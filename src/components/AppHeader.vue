@@ -1,10 +1,18 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { useAccountsStore } from '@/stores/useAccountsStore'
+
+const store = useAccountsStore()
+
+const addNewAccount = () => {
+  store.addNewAccount()
+}
+</script>
 
 <template>
   <header>
     <div class="container">
       <span> Учётные записи </span>
-      <app-button label="Добавить" icon="pi pi-plus" />
+      <app-button label="Добавить" icon="pi pi-plus" @click="addNewAccount" />
     </div>
   </header>
 </template>
