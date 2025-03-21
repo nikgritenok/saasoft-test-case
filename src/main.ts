@@ -6,6 +6,7 @@ import { createPinia } from 'pinia'
 import Button from 'primevue/button'
 import PrimeVue from 'primevue/config'
 import Divider from 'primevue/divider'
+import IftaLabel from 'primevue/iftalabel'
 import InputText from 'primevue/inputtext'
 import Message from 'primevue/message'
 import Password from 'primevue/password'
@@ -29,4 +30,5 @@ app.component('app-select', Select)
 app.component('app-password', Password)
 app.component('app-message', Message)
 app.component('app-divider', Divider)
+app.component('app-iftalabel', IftaLabel)
 app.mount('#app')
