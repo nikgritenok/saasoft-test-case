@@ -1,8 +1,16 @@
 <script setup lang="ts">
-import { useAccountsStore } from '@/stores/useAccountsStore'
+import { useAccountsStore, parseTagString } from '@/stores/useAccountsStore'
 import type { Account } from '@/stores/useAccountsStore'
 
 const store = useAccountsStore()
+
+const getTagString = (account: Account) => {
+  return account.tag.map((t) => t.text).join(';')
+}
+
+const setTagString = (account: Account, value: string) => {
+  store.updateAccount(account.id, { tag: parseTagString(value) })
+}
 
 const handleUpdate = (account: Account, field: keyof Account, value: Account[keyof Account]) => {
   store.updateAccount(account.id, { [field]: value })
@@ -12,13 +20,13 @@ const handleDelete = (id: number) => {
   store.deleteAccount(id)
 }
 
-const isValidTag = (tag: string | undefined) => {
+const isValidTag = (tag: string) => {
   return !tag || tag.length <= 50
 }
 
-const validateInputTag = (account: Account) => {
-  if (account.tag && account.tag.length > 50) {
-    account.tag = account.tag.slice(0, 50)
+const validateInputTag = (account: Account, value: string) => {
+  if (value.length > 50) {
+    setTagString(account, value.slice(0, 50))
   }
 }
 
@@ -57,15 +65,17 @@ const validateAccount = (account: Account) => {
       <app-iftalabel class="flex flex-column gap-2 w-15rem">
         <label>Метки</label>
         <app-input
-          v-model="account.tag"
+          :modelValue="getTagString(account)"
+          @update:modelValue="(value: string) => setTagString(account, value)"
           inputId="tag"
-          @update:modelValue="(value: Account['tag']) => handleUpdate(account, 'tag', value)"
           label="Метки"
-          @input="validateInputTag(account)"
-          :invalid="!isValidTag(account.tag)"
+          @input="(e: Event) => validateInputTag(account, (e.target as HTMLInputElement).value)"
+          :invalid="!isValidTag(getTagString(account))"
           @blur="validateAccount(account)"
         />
-        <small v-if="!isValidTag(account.tag)" class="p-error">Максимум 50 символов</small>
+        <small v-if="!isValidTag(getTagString(account))" class="p-error"
+          >Максимум 50 символов</small
+        >
       </app-iftalabel>
 
       <app-iftalabel class="flex flex-column gap-2 w-15rem">
