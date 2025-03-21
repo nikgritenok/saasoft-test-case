@@ -1,8 +1,45 @@
 <script setup lang="ts">
 import { useAccountsStore, parseTagString } from '@/stores/useAccountsStore'
 import type { Account } from '@/stores/useAccountsStore'
+import { useConfirm } from 'primevue/useconfirm'
+import { useToast } from 'primevue/usetoast'
 
 const store = useAccountsStore()
+const confirm = useConfirm()
+const toast = useToast()
+
+const confirm1 = (account: Account) => {
+  confirm.require({
+    message: 'Вы уверены, что хотите удалить эту учетную запись?',
+    header: 'Удаление учетной записи',
+    icon: 'pi pi-exclamation-triangle',
+    rejectProps: {
+      label: 'Отмена',
+      severity: 'secondary',
+      outlined: true,
+    },
+    acceptProps: {
+      label: 'Удалить',
+    },
+    accept: () => {
+      handleDelete(account.id)
+      toast.add({
+        severity: 'info',
+        summary: 'Удалено',
+        detail: 'Учетная запись удалена',
+        life: 3000,
+      })
+    },
+    reject: () => {
+      toast.add({
+        severity: 'error',
+        summary: 'Отмена',
+        detail: 'Учетная запись не удалена',
+        life: 3000,
+      })
+    },
+  })
+}
 
 const getTagString = (account: Account) => {
   return account.tag.map((t) => t.text).join(';')
@@ -60,83 +97,87 @@ const validateAccount = (account: Account) => {
 </script>
 
 <template>
+  <app-confirmdialog />
+  <app-toast />
   <div class="forms-container">
-    <div class="form-item" v-for="account in store.accounts" :key="account.id">
-      <app-iftalabel class="flex flex-column gap-2 w-15rem">
-        <label>Метки</label>
-        <app-input
-          :modelValue="getTagString(account)"
-          @update:modelValue="(value: string) => setTagString(account, value)"
-          inputId="tag"
-          label="Метки"
-          @input="(e: Event) => validateInputTag(account, (e.target as HTMLInputElement).value)"
-          :invalid="!isValidTag(getTagString(account))"
-          @blur="validateAccount(account)"
-        />
-        <small v-if="!isValidTag(getTagString(account))" class="p-error"
-          >Максимум 50 символов</small
-        >
-      </app-iftalabel>
+    <TransitionGroup name="list" tag="div">
+      <div class="form-item" v-for="account in store.accounts" :key="account.id">
+        <app-iftalabel class="flex flex-column gap-2 w-15rem">
+          <label>Метки</label>
+          <app-input
+            :modelValue="getTagString(account)"
+            @update:modelValue="(value: string) => setTagString(account, value)"
+            inputId="tag"
+            label="Метки"
+            @input="(e: Event) => validateInputTag(account, (e.target as HTMLInputElement).value)"
+            :invalid="!isValidTag(getTagString(account))"
+            @blur="validateAccount(account)"
+          />
+          <small v-if="!isValidTag(getTagString(account))" class="p-error"
+            >Максимум 50 символов</small
+          >
+        </app-iftalabel>
 
-      <app-iftalabel class="flex flex-column gap-2 w-15rem">
-        <app-select
-          v-model="account.type"
-          @update:modelValue="
-            (value: Account['type']) => {
-              handleUpdate(account, 'type', value)
-              validateAccount(account)
-            }
-          "
-          :options="['LDAP', 'LOCAL']"
-        />
-        <label>Тип записи</label>
-      </app-iftalabel>
+        <app-iftalabel class="flex flex-column gap-2 w-15rem">
+          <app-select
+            v-model="account.type"
+            @update:modelValue="
+              (value: Account['type']) => {
+                handleUpdate(account, 'type', value)
+                validateAccount(account)
+              }
+            "
+            :options="['LDAP', 'LOCAL']"
+          />
+          <label>Тип записи</label>
+        </app-iftalabel>
 
-      <app-iftalabel class="flex flex-column gap-2 login-label">
-        <label>Логин</label>
-        <app-input
-          v-model="account.login"
-          @update:modelValue="(value: Account['login']) => handleUpdate(account, 'login', value)"
-          label="Логин"
-          :invalid="!isValidLogin(account.login)"
-          @input="validateInputLogin(account)"
-          @blur="validateAccount(account)"
-        />
-        <small v-if="!isValidLogin(account.login)" class="p-error">Максимум 100 символов</small>
-      </app-iftalabel>
+        <app-iftalabel class="flex flex-column gap-2 login-label">
+          <label>Логин</label>
+          <app-input
+            v-model="account.login"
+            @update:modelValue="(value: Account['login']) => handleUpdate(account, 'login', value)"
+            label="Логин"
+            :invalid="!isValidLogin(account.login)"
+            @input="validateInputLogin(account)"
+            @blur="validateAccount(account)"
+          />
+          <small v-if="!isValidLogin(account.login)" class="p-error">Максимум 100 символов</small>
+        </app-iftalabel>
 
-      <app-iftalabel v-if="account.type === 'LOCAL'" class="flex flex-column gap-2">
-        <app-password
-          v-model="account.password"
-          @update:modelValue="
-            (value: Account['password']) => handleUpdate(account, 'password', value)
-          "
-          label="Пароль"
-          promptLabel="Выберите пароль"
-          weakLabel="Слабый"
-          mediumLabel="Средний"
-          strongLabel="Сильный"
-          toggleMask
-          :invalid="!isValidPassword(account.password)"
-          @input="validateInputPassword(account)"
-          @blur="validateAccount(account)"
-        >
-          <template #footer>
-            <app-divider />
-            <ul class="my-0 leading-normal">
-              <li>Максимум 100 символов</li>
-            </ul>
-          </template>
-        </app-password>
-        <label>Пароль</label>
-        <small v-if="!isValidPassword(account.password)" class="p-error"
-          >Максимум 100 символов</small
-        >
-      </app-iftalabel>
-      <div class="delete-icon-container">
-        <i class="pi pi-trash delete-icon" @click="handleDelete(account.id)"></i>
+        <app-iftalabel v-if="account.type === 'LOCAL'" class="flex flex-column gap-2">
+          <app-password
+            v-model="account.password"
+            @update:modelValue="
+              (value: Account['password']) => handleUpdate(account, 'password', value)
+            "
+            label="Пароль"
+            promptLabel="Выберите пароль"
+            weakLabel="Слабый"
+            mediumLabel="Средний"
+            strongLabel="Сильный"
+            toggleMask
+            :invalid="!isValidPassword(account.password)"
+            @input="validateInputPassword(account)"
+            @blur="validateAccount(account)"
+          >
+            <template #footer>
+              <app-divider />
+              <ul class="my-0 leading-normal">
+                <li>Максимум 100 символов</li>
+              </ul>
+            </template>
+          </app-password>
+          <label>Пароль</label>
+          <small v-if="!isValidPassword(account.password)" class="p-error"
+            >Максимум 100 символов</small
+          >
+        </app-iftalabel>
+        <div class="delete-icon-container">
+          <i class="pi pi-trash delete-icon" @click="confirm1(account)"></i>
+        </div>
       </div>
-    </div>
+    </TransitionGroup>
   </div>
 </template>
 
@@ -144,7 +185,6 @@ const validateAccount = (account: Account) => {
 .forms-container {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
   padding: 1rem;
 }
 
@@ -154,6 +194,7 @@ const validateAccount = (account: Account) => {
   width: 100%;
   gap: 1rem;
   align-items: flex-start;
+  margin-bottom: 1rem;
 }
 
 .delete-icon {
@@ -172,5 +213,20 @@ i {
 
 .login-label {
   flex-grow: 1;
+}
+
+.list-enter-active,
+.list-leave-active {
+  transition: all 0.3s ease;
+}
+
+.list-enter-from,
+.list-leave-to {
+  opacity: 0;
+  transform: translateX(30px);
+}
+
+.list-move {
+  transition: transform 0.3s ease;
 }
 </style>
