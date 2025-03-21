@@ -1,8 +1,45 @@
 <script setup lang="ts">
 import { useAccountsStore, parseTagString } from '@/stores/useAccountsStore'
 import type { Account } from '@/stores/useAccountsStore'
+import { useConfirm } from 'primevue/useconfirm'
+import { useToast } from 'primevue/usetoast'
 
 const store = useAccountsStore()
+const confirm = useConfirm()
+const toast = useToast()
+
+const confirm1 = (account: Account) => {
+  confirm.require({
+    message: 'Вы уверены, что хотите удалить эту учетную запись?',
+    header: 'Удаление учетной записи',
+    icon: 'pi pi-exclamation-triangle',
+    rejectProps: {
+      label: 'Отмена',
+      severity: 'secondary',
+      outlined: true,
+    },
+    acceptProps: {
+      label: 'Удалить',
+    },
+    accept: () => {
+      handleDelete(account.id)
+      toast.add({
+        severity: 'info',
+        summary: 'Удалено',
+        detail: 'Учетная запись удалена',
+        life: 3000,
+      })
+    },
+    reject: () => {
+      toast.add({
+        severity: 'error',
+        summary: 'Отмена',
+        detail: 'Учетная запись не удалена',
+        life: 3000,
+      })
+    },
+  })
+}
 
 const getTagString = (account: Account) => {
   return account.tag.map((t) => t.text).join(';')
@@ -60,6 +97,8 @@ const validateAccount = (account: Account) => {
 </script>
 
 <template>
+  <app-confirmdialog />
+  <app-toast />
   <div class="forms-container">
     <div class="form-item" v-for="account in store.accounts" :key="account.id">
       <app-iftalabel class="flex flex-column gap-2 w-15rem">
@@ -134,7 +173,7 @@ const validateAccount = (account: Account) => {
         >
       </app-iftalabel>
       <div class="delete-icon-container">
-        <i class="pi pi-trash delete-icon" @click="handleDelete(account.id)"></i>
+        <i class="pi pi-trash delete-icon" @click="confirm1(account)"></i>
       </div>
     </div>
   </div>
