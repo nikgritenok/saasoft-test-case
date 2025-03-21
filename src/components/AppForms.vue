@@ -43,7 +43,7 @@ const handleDelete = (id: number) => {
       <div class="flex flex-column gap-2">
         <label>Пароль</label>
         <app-password
-          :value="account.password"
+          v-model="account.password"
           @update:modelValue="
             (value: Account['password']) => handleUpdate(account, 'password', value)
           "
