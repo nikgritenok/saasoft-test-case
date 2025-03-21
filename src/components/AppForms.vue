@@ -54,7 +54,7 @@ const validateAccount = (account: Account) => {
 <template>
   <div class="forms-container">
     <div class="form-item" v-for="account in store.accounts" :key="account.id">
-      <app-iftalabel class="flex flex-column gap-2">
+      <app-iftalabel class="flex flex-column gap-2 w-15rem">
         <label>Метки</label>
         <app-input
           v-model="account.tag"
@@ -68,7 +68,7 @@ const validateAccount = (account: Account) => {
         <small v-if="!isValidTag(account.tag)" class="p-error">Максимум 50 символов</small>
       </app-iftalabel>
 
-      <app-iftalabel class="flex flex-column gap-2">
+      <app-iftalabel class="flex flex-column gap-2 w-15rem">
         <app-select
           v-model="account.type"
           @update:modelValue="
@@ -82,7 +82,7 @@ const validateAccount = (account: Account) => {
         <label>Тип записи</label>
       </app-iftalabel>
 
-      <app-iftalabel class="flex flex-column gap-2">
+      <app-iftalabel class="flex flex-column gap-2 login-label">
         <label>Логин</label>
         <app-input
           v-model="account.login"
@@ -141,8 +141,9 @@ const validateAccount = (account: Account) => {
 .form-item {
   display: flex;
   flex-direction: row;
-  gap: 1rem;
   width: 100%;
+  gap: 1rem;
+  align-items: flex-start;
 }
 
 .delete-icon {
@@ -159,15 +160,7 @@ i {
   font-size: 3rem;
 }
 
-.p-iftalabel {
+.login-label {
   flex-grow: 1;
-}
-
-:deep(.p-password) {
-  width: 100%;
-}
-
-:deep(.p-password-input) {
-  width: 100%;
 }
 </style>

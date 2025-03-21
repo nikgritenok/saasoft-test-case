@@ -4,7 +4,7 @@ import { ref, watch } from 'vue'
 export interface Account {
   id: number
   tag?: string
-  type: 'LDAP' | 'LOCAL'
+  type: 'LDAP' | 'LOCAL' | ''
   login: string
   password: string | null
 }
@@ -32,7 +32,7 @@ export const useAccountsStore = defineStore('accounts', () => {
     accounts.value.push({
       id: Date.now(),
       tag: '',
-      type: 'LOCAL',
+      type: '',
       login: '',
       password: null,
     })
