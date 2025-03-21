@@ -1,6 +1,8 @@
 import './assets/main.css'
+import 'primeicons/primeicons.css'
 
 import { createPinia } from 'pinia'
+import Button from 'primevue/button'
 import PrimeVue from 'primevue/config'
 import { createApp } from 'vue'
 import Aura from '@primeuix/themes/aura'
@@ -14,5 +16,7 @@ app.use(PrimeVue, {
     preset: Aura,
   },
 })
+
+app.component('app-button', Button)
 
 app.mount('#app')

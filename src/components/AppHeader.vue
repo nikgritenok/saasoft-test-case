@@ -4,7 +4,7 @@
   <header>
     <div class="container">
       <span> Учётные записи </span>
-      <div>+</div>
+      <app-button label="Добавить" icon="pi pi-plus" />
     </div>
   </header>
 </template>
@@ -15,11 +15,19 @@ header {
   justify-content: space-between;
   align-items: center;
   padding: 1rem 0;
+  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 1rem;
+}
+
+span {
+  font-weight: 600;
 }
 
 .container {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 1rem;
+  margin-left: 1rem;
 }
 </style>
