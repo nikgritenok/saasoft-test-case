@@ -54,10 +54,11 @@ const validateAccount = (account: Account) => {
 <template>
   <div class="forms-container">
     <div class="form-item" v-for="account in store.accounts" :key="account.id">
-      <div class="flex flex-column gap-2">
+      <app-iftalabel class="flex flex-column gap-2">
         <label>Метки</label>
         <app-input
-          :value="account.tag"
+          v-model="account.tag"
+          inputId="tag"
           @update:modelValue="(value: Account['tag']) => handleUpdate(account, 'tag', value)"
           label="Метки"
           @input="validateInputTag(account)"
@@ -65,9 +66,9 @@ const validateAccount = (account: Account) => {
           @blur="validateAccount(account)"
         />
         <small v-if="!isValidTag(account.tag)" class="p-error">Максимум 50 символов</small>
-      </div>
-      <div class="flex flex-column gap-2 w-12rem">
-        <label>Тип записи</label>
+      </app-iftalabel>
+
+      <app-iftalabel class="flex flex-column gap-2">
         <app-select
           v-model="account.type"
           @update:modelValue="
@@ -78,11 +79,13 @@ const validateAccount = (account: Account) => {
           "
           :options="['LDAP', 'LOCAL']"
         />
-      </div>
-      <div class="flex flex-column gap-2">
+        <label>Тип записи</label>
+      </app-iftalabel>
+
+      <app-iftalabel class="flex flex-column gap-2">
         <label>Логин</label>
         <app-input
-          :value="account.login"
+          v-model="account.login"
           @update:modelValue="(value: Account['login']) => handleUpdate(account, 'login', value)"
           label="Логин"
           :invalid="!isValidLogin(account.login)"
@@ -90,9 +93,9 @@ const validateAccount = (account: Account) => {
           @blur="validateAccount(account)"
         />
         <small v-if="!isValidLogin(account.login)" class="p-error">Максимум 100 символов</small>
-      </div>
-      <div v-if="account.type === 'LOCAL'" class="flex flex-column gap-2">
-        <label>Пароль</label>
+      </app-iftalabel>
+
+      <app-iftalabel v-if="account.type === 'LOCAL'" class="flex flex-column gap-2">
         <app-password
           v-model="account.password"
           @update:modelValue="
@@ -115,11 +118,14 @@ const validateAccount = (account: Account) => {
             </ul>
           </template>
         </app-password>
+        <label>Пароль</label>
         <small v-if="!isValidPassword(account.password)" class="p-error"
           >Максимум 100 символов</small
         >
+      </app-iftalabel>
+      <div class="delete-icon-container">
+        <i class="pi pi-trash delete-icon" @click="handleDelete(account.id)"></i>
       </div>
-      <i class="pi pi-trash delete-icon" @click="handleDelete(account.id)"></i>
     </div>
   </div>
 </template>
@@ -137,23 +143,31 @@ const validateAccount = (account: Account) => {
   flex-direction: row;
   gap: 1rem;
   width: 100%;
-  position: relative;
-  max-width: 1200px;
-}
-
-.form-item > div {
-  flex: 1;
-}
-
-.form-item > div.w-12rem {
-  flex: 0 0 12rem;
 }
 
 .delete-icon {
-  position: absolute;
-  right: -3rem;
-  top: 1.7rem;
-  font-size: 2.2rem;
   cursor: pointer;
+}
+
+.delete-icon-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+i {
+  font-size: 3rem;
+}
+
+.p-iftalabel {
+  flex-grow: 1;
+}
+
+:deep(.p-password) {
+  width: 100%;
+}
+
+:deep(.p-password-input) {
+  width: 100%;
 }
 </style>
