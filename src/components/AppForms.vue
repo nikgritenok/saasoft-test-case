@@ -27,7 +27,7 @@ const handleDelete = (id: number) => {
       <div class="flex flex-column gap-2">
         <label>Тип записи</label>
         <app-select
-          :value="account.type"
+          v-model="account.type"
           @update:modelValue="(value: Account['type']) => handleUpdate(account, 'type', value)"
           :options="['LDAP', 'LOCAL']"
         />

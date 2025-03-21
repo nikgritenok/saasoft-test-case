@@ -33,7 +33,7 @@ export const useAccountsStore = defineStore('accounts', () => {
       tag: '',
       type: 'LOCAL',
       login: '',
-      password: '',
+      password: null,
     })
   }
 
