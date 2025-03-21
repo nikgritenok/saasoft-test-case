@@ -11,6 +11,32 @@ const handleUpdate = (account: Account, field: keyof Account, value: Account[key
 const handleDelete = (id: number) => {
   store.deleteAccount(id)
 }
+
+const isValidTag = (tag: string | undefined) => {
+  return !tag || tag.length <= 50
+}
+
+const validateInputTag = (account: Account) => {
+  if (account.tag && account.tag.length > 50) {
+    account.tag = account.tag.slice(0, 50)
+  }
+}
+
+const isValidLogin = (login: string | undefined) => {
+  return !login || login.length <= 100
+}
+
+const validateInputLogin = (account: Account) => {
+  if (account.login && account.login.length > 100) {
+    account.login = account.login.slice(0, 100)
+  }
+}
+
+const isValidPassword = (password: string) => {
+  console.log(password?.length)
+  console.log(password?.length <= 100)
+  return password.length <= 100
+}
 </script>
 
 <template>
@@ -22,7 +48,10 @@ const handleDelete = (id: number) => {
           :value="account.tag"
           @update:modelValue="(value: Account['tag']) => handleUpdate(account, 'tag', value)"
           label="Метки"
+          @input="validateInputTag(account)"
+          :invalid="!isValidTag(account.tag)"
         />
+        <small v-if="!isValidTag(account.tag)" class="p-error">Максимум 50 символов</small>
       </div>
       <div class="flex flex-column gap-2">
         <label>Тип записи</label>
@@ -38,7 +67,10 @@ const handleDelete = (id: number) => {
           :value="account.login"
           @update:modelValue="(value: Account['login']) => handleUpdate(account, 'login', value)"
           label="Логин"
+          :invalid="!isValidLogin(account.login)"
+          @input="validateInputLogin(account)"
         />
+        <small v-if="!isValidLogin(account.login)" class="p-error">Максимум 100 символов</small>
       </div>
       <div class="flex flex-column gap-2">
         <label>Пароль</label>
@@ -48,8 +80,23 @@ const handleDelete = (id: number) => {
             (value: Account['password']) => handleUpdate(account, 'password', value)
           "
           label="Пароль"
+          promptLabel="Выберите пароль"
+          weakLabel="Слабый"
+          mediumLabel="Средний"
+          strongLabel="Сильный"
           toggleMask
-        />
+          :invalid="!isValidPassword(account.password ?? '')"
+        >
+          <template #footer>
+            <app-divider />
+            <ul class="my-0 leading-normal">
+              <li>Максимум 100 символов</li>
+            </ul>
+          </template></app-password
+        >
+        <small v-if="!isValidPassword(account.password ?? '')" class="p-error"
+          >Максимум 100 символов</small
+        >
       </div>
       <div class="delete-icon flex align-items-end">
         <i class="pi pi-trash" @click="handleDelete(account.id)"></i>
