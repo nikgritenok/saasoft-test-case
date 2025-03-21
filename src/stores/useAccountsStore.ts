@@ -19,6 +19,7 @@ export const useAccountsStore = defineStore('accounts', () => {
     if (savedAccounts) {
       accounts.value = JSON.parse(savedAccounts)
     }
+    console.log(accounts.value)
   }
 
   const saveAccounts = () => {

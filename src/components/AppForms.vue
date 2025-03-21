@@ -23,7 +23,7 @@ const validateInputTag = (account: Account) => {
 }
 
 const isValidLogin = (login: string | undefined) => {
-  return !login || login.length <= 100
+  return login && login.length <= 100
 }
 
 const validateInputLogin = (account: Account) => {
@@ -32,10 +32,22 @@ const validateInputLogin = (account: Account) => {
   }
 }
 
-const isValidPassword = (password: string) => {
-  console.log(password?.length)
-  console.log(password?.length <= 100)
-  return password.length <= 100
+const isValidPassword = (password: string | null) => {
+  return password && password.length <= 100
+}
+
+const validateInputPassword = (account: Account) => {
+  if (account.password && account.password.length > 100) {
+    account.password = account.password.slice(0, 100)
+  }
+}
+
+const validateAccount = (account: Account) => {
+  const isValid = isValidLogin(account.login) && isValidPassword(account.password)
+  if (isValid) {
+    store.updateAccount(account.id, account)
+  }
+  return isValid
 }
 </script>
 
@@ -50,14 +62,20 @@ const isValidPassword = (password: string) => {
           label="Метки"
           @input="validateInputTag(account)"
           :invalid="!isValidTag(account.tag)"
+          @blur="validateAccount(account)"
         />
         <small v-if="!isValidTag(account.tag)" class="p-error">Максимум 50 символов</small>
       </div>
-      <div class="flex flex-column gap-2">
+      <div class="flex flex-column gap-2 w-12rem">
         <label>Тип записи</label>
         <app-select
           v-model="account.type"
-          @update:modelValue="(value: Account['type']) => handleUpdate(account, 'type', value)"
+          @update:modelValue="
+            (value: Account['type']) => {
+              handleUpdate(account, 'type', value)
+              validateAccount(account)
+            }
+          "
           :options="['LDAP', 'LOCAL']"
         />
       </div>
@@ -69,10 +87,11 @@ const isValidPassword = (password: string) => {
           label="Логин"
           :invalid="!isValidLogin(account.login)"
           @input="validateInputLogin(account)"
+          @blur="validateAccount(account)"
         />
         <small v-if="!isValidLogin(account.login)" class="p-error">Максимум 100 символов</small>
       </div>
-      <div class="flex flex-column gap-2">
+      <div v-if="account.type === 'LOCAL'" class="flex flex-column gap-2">
         <label>Пароль</label>
         <app-password
           v-model="account.password"
@@ -85,22 +104,22 @@ const isValidPassword = (password: string) => {
           mediumLabel="Средний"
           strongLabel="Сильный"
           toggleMask
-          :invalid="!isValidPassword(account.password ?? '')"
+          :invalid="!isValidPassword(account.password)"
+          @input="validateInputPassword(account)"
+          @blur="validateAccount(account)"
         >
           <template #footer>
             <app-divider />
             <ul class="my-0 leading-normal">
               <li>Максимум 100 символов</li>
             </ul>
-          </template></app-password
-        >
-        <small v-if="!isValidPassword(account.password ?? '')" class="p-error"
+          </template>
+        </app-password>
+        <small v-if="!isValidPassword(account.password)" class="p-error"
           >Максимум 100 символов</small
         >
       </div>
-      <div class="delete-icon flex align-items-end">
-        <i class="pi pi-trash" @click="handleDelete(account.id)"></i>
-      </div>
+      <i class="pi pi-trash delete-icon" @click="handleDelete(account.id)"></i>
     </div>
   </div>
 </template>
@@ -118,11 +137,23 @@ const isValidPassword = (password: string) => {
   flex-direction: row;
   gap: 1rem;
   width: 100%;
+  position: relative;
+  max-width: 1200px;
 }
 
-.delete-icon i {
+.form-item > div {
+  flex: 1;
+}
+
+.form-item > div.w-12rem {
+  flex: 0 0 12rem;
+}
+
+.delete-icon {
+  position: absolute;
+  right: -3rem;
+  top: 1.7rem;
   font-size: 2.2rem;
   cursor: pointer;
-  margin-bottom: 0.1rem;
 }
 </style>
