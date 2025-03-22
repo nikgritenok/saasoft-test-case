@@ -249,4 +249,8 @@ i {
 .list-move {
   transition: transform 0.3s ease;
 }
+
+.p-password-input {
+  width: 100%;
+}
 </style>
