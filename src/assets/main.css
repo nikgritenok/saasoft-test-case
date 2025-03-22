@@ -149,3 +149,7 @@ section,
 summary {
   display: block;
 }
+
+.p-password-input {
+  width: 100%;
+}

@@ -101,8 +101,12 @@ const validateAccount = (account: Account) => {
   <app-toast />
   <div v-if="store.accounts.length > 0" class="forms-container">
     <TransitionGroup name="list" tag="div">
-      <div class="form-item" v-for="account in store.accounts" :key="account.id">
-        <app-iftalabel class="flex flex-column gap-2 w-15rem">
+      <div
+        class="form-item flex flex-column md:flex-row"
+        v-for="account in store.accounts"
+        :key="account.id"
+      >
+        <app-iftalabel class="flex flex-column gap-2 w-full md:w-15rem">
           <label>Метки</label>
           <app-input
             :modelValue="getTagString(account)"
@@ -118,7 +122,7 @@ const validateAccount = (account: Account) => {
           >
         </app-iftalabel>
 
-        <app-iftalabel class="flex flex-column gap-2 w-15rem">
+        <app-iftalabel class="flex flex-column gap-2 w-full md:w-15rem">
           <app-select
             v-model="account.type"
             @update:modelValue="
@@ -132,7 +136,7 @@ const validateAccount = (account: Account) => {
           <label>Тип записи</label>
         </app-iftalabel>
 
-        <app-iftalabel class="flex flex-column gap-2 login-label">
+        <app-iftalabel class="flex flex-column gap-2 login-label w-full md:w-15rem">
           <label>Логин</label>
           <app-input
             v-model="account.login"
@@ -145,37 +149,45 @@ const validateAccount = (account: Account) => {
           <small v-if="!isValidLogin(account.login)" class="p-error">Максимум 100 символов</small>
         </app-iftalabel>
 
-        <app-iftalabel v-if="account.type === 'LOCAL'" class="flex flex-column gap-2">
-            <app-password
-              v-model="account.password"
-              @update:modelValue="
-                (value: Account['password']) => handleUpdate(account, 'password', value)
-              "
-              label="Пароль"
-              promptLabel="Выберите пароль"
-              weakLabel="Слабый"
-              mediumLabel="Средний"
-              strongLabel="Сильный"
-              toggleMask
-              :invalid="!isValidPassword(account.password)"
-              @input="validateInputPassword(account)"
-              @blur="validateAccount(account)"
-            >
-              <template #footer>
-                <app-divider />
-                <ul class="my-0 leading-normal">
-                  <li>Максимум 100 символов</li>
-                </ul>
-              </template>
-            </app-password>
-            <label>Пароль</label>
-            <small v-if="!isValidPassword(account.password)" class="p-error"
-              >Максимум 100 символов</small
-            >
-          </app-iftalabel>
-        <div class="delete-icon-container">
-          <i class="pi pi-trash delete-icon" @click="confirm1(account)"></i>
-        </div>
+        <app-iftalabel
+          v-if="account.type === 'LOCAL'"
+          class="flex flex-column gap-2 w-full md:w-15rem"
+        >
+          <app-password
+            v-model="account.password"
+            @update:modelValue="
+              (value: Account['password']) => handleUpdate(account, 'password', value)
+            "
+            label="Пароль"
+            promptLabel="Выберите пароль"
+            weakLabel="Слабый"
+            mediumLabel="Средний"
+            strongLabel="Сильный"
+            toggleMask
+            :invalid="!isValidPassword(account.password)"
+            @input="validateInputPassword(account)"
+            @blur="validateAccount(account)"
+            class="w-full md:w-15rem password-input"
+          >
+            <template #footer>
+              <app-divider />
+              <ul class="my-0 leading-normal">
+                <li>Максимум 100 символов</li>
+              </ul>
+            </template>
+          </app-password>
+          <label>Пароль</label>
+          <small v-if="!isValidPassword(account.password)" class="p-error"
+            >Максимум 100 символов</small
+          >
+        </app-iftalabel>
+        <app-button
+          icon="pi pi-trash delete-icon-container"
+          severity="danger"
+          class="d-block w-full md:d-none md:w-10rem"
+          @click="confirm1(account)"
+          label="удалить"
+        />
       </div>
     </TransitionGroup>
   </div>
@@ -196,12 +208,13 @@ const validateAccount = (account: Account) => {
 }
 
 .form-item {
-  display: flex;
-  flex-direction: row;
   width: 100%;
   gap: 1rem;
   align-items: flex-start;
   margin-bottom: 1rem;
+  background-color: var(--p-content-border-color);
+  padding: 1rem;
+  border-radius: 1rem;
 }
 
 .delete-icon {
@@ -235,5 +248,9 @@ i {
 
 .list-move {
   transition: transform 0.3s ease;
+}
+
+.p-password-input {
+  width: 100%;
 }
 </style>
