@@ -4,6 +4,7 @@ import 'primeflex/primeflex.css'
 
 import { createPinia } from 'pinia'
 import Button from 'primevue/button'
+import Card from 'primevue/card'
 import PrimeVue from 'primevue/config'
 import ConfirmationService from 'primevue/confirmationservice'
 import ConfirmDialog from 'primevue/confirmdialog'
@@ -25,6 +26,9 @@ app.use(createPinia())
 app.use(PrimeVue, {
   theme: {
     preset: Aura,
+    options: {
+      darkModeSelector: '.dark',
+    },
   },
 })
 app.use(ConfirmationService)
@@ -39,4 +43,5 @@ app.component('app-divider', Divider)
 app.component('app-iftalabel', IftaLabel)
 app.component('app-confirmdialog', ConfirmDialog)
 app.component('app-toast', Toast)
+app.component('app-card', Card)
 app.mount('#app')

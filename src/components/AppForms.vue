@@ -99,7 +99,7 @@ const validateAccount = (account: Account) => {
 <template>
   <app-confirmdialog />
   <app-toast />
-  <div class="forms-container">
+  <div v-if="store.accounts.length > 0" class="forms-container">
     <TransitionGroup name="list" tag="div">
       <div class="form-item" v-for="account in store.accounts" :key="account.id">
         <app-iftalabel class="flex flex-column gap-2 w-15rem">
@@ -146,38 +146,45 @@ const validateAccount = (account: Account) => {
         </app-iftalabel>
 
         <app-iftalabel v-if="account.type === 'LOCAL'" class="flex flex-column gap-2">
-          <app-password
-            v-model="account.password"
-            @update:modelValue="
-              (value: Account['password']) => handleUpdate(account, 'password', value)
-            "
-            label="Пароль"
-            promptLabel="Выберите пароль"
-            weakLabel="Слабый"
-            mediumLabel="Средний"
-            strongLabel="Сильный"
-            toggleMask
-            :invalid="!isValidPassword(account.password)"
-            @input="validateInputPassword(account)"
-            @blur="validateAccount(account)"
-          >
-            <template #footer>
-              <app-divider />
-              <ul class="my-0 leading-normal">
-                <li>Максимум 100 символов</li>
-              </ul>
-            </template>
-          </app-password>
-          <label>Пароль</label>
-          <small v-if="!isValidPassword(account.password)" class="p-error"
-            >Максимум 100 символов</small
-          >
-        </app-iftalabel>
+            <app-password
+              v-model="account.password"
+              @update:modelValue="
+                (value: Account['password']) => handleUpdate(account, 'password', value)
+              "
+              label="Пароль"
+              promptLabel="Выберите пароль"
+              weakLabel="Слабый"
+              mediumLabel="Средний"
+              strongLabel="Сильный"
+              toggleMask
+              :invalid="!isValidPassword(account.password)"
+              @input="validateInputPassword(account)"
+              @blur="validateAccount(account)"
+            >
+              <template #footer>
+                <app-divider />
+                <ul class="my-0 leading-normal">
+                  <li>Максимум 100 символов</li>
+                </ul>
+              </template>
+            </app-password>
+            <label>Пароль</label>
+            <small v-if="!isValidPassword(account.password)" class="p-error"
+              >Максимум 100 символов</small
+            >
+          </app-iftalabel>
         <div class="delete-icon-container">
           <i class="pi pi-trash delete-icon" @click="confirm1(account)"></i>
         </div>
       </div>
     </TransitionGroup>
+  </div>
+  <div v-else class="no-accounts-container m-3">
+    <app-card>
+      <template #content>
+        <p>Нет учетных записей, добавьте хотя бы одну</p>
+      </template>
+    </app-card>
   </div>
 </template>
 
