@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useAccountsStore, parseTagString } from '@/stores/useAccountsStore'
+import { useAccountsStore, parseTagString, isAccountValid } from '@/stores/useAccountsStore'
 import type { Account } from '@/stores/useAccountsStore'
 import { useConfirm } from 'primevue/useconfirm'
 import { useToast } from 'primevue/usetoast'
@@ -49,10 +49,6 @@ const setTagString = (account: Account, value: string) => {
   store.updateAccount(account.id, { tag: parseTagString(value) })
 }
 
-const handleUpdate = (account: Account, field: keyof Account, value: Account[keyof Account]) => {
-  store.updateAccount(account.id, { [field]: value })
-}
-
 const handleDelete = (id: number) => {
   store.deleteAccount(id)
 }
@@ -68,7 +64,7 @@ const validateInputTag = (account: Account, value: string) => {
 }
 
 const isValidLogin = (login: string | undefined) => {
-  return login && login.length <= 100
+  return login && login.length > 0 && login.length <= 100
 }
 
 const validateInputLogin = (account: Account) => {
@@ -78,7 +74,7 @@ const validateInputLogin = (account: Account) => {
 }
 
 const isValidPassword = (password: string | null) => {
-  return password && password.length <= 100
+  return password && password.length > 0 && password.length <= 100
 }
 
 const validateInputPassword = (account: Account) => {
@@ -88,11 +84,22 @@ const validateInputPassword = (account: Account) => {
 }
 
 const validateAccount = (account: Account) => {
-  const isValid = isValidLogin(account.login) && isValidPassword(account.password)
-  if (isValid) {
-    store.updateAccount(account.id, account)
+  return isAccountValid(account)
+}
+
+const handleUpdateWithValidation = (
+  account: Account,
+  field: keyof Account,
+  value: Account[keyof Account],
+) => {
+  // Сначала обновляем значение локально
+  const updatedValue = value as unknown as Account[typeof field]
+
+  // Затем проверяем валидность
+  if (validateAccount({ ...account, [field]: updatedValue })) {
+    // Обновляем только если валидно
+    store.updateAccount(account.id, { [field]: value })
   }
-  return isValid
 }
 </script>
 
@@ -110,7 +117,13 @@ const validateAccount = (account: Account) => {
           <label>Метки</label>
           <app-input
             :modelValue="getTagString(account)"
-            @update:modelValue="(value: string) => setTagString(account, value)"
+            @update:modelValue="
+              (value: string) => {
+                if (isValidTag(value)) {
+                  setTagString(account, value)
+                }
+              }
+            "
             inputId="tag"
             label="Метки"
             @input="(e: Event) => validateInputTag(account, (e.target as HTMLInputElement).value)"
@@ -127,8 +140,10 @@ const validateAccount = (account: Account) => {
             v-model="account.type"
             @update:modelValue="
               (value: Account['type']) => {
-                handleUpdate(account, 'type', value)
-                validateAccount(account)
+                if (value === 'LDAP' && account.password) {
+                  handleUpdateWithValidation(account, 'password', null)
+                }
+                handleUpdateWithValidation(account, 'type', value)
               }
             "
             :options="['LDAP', 'LOCAL']"
@@ -140,7 +155,9 @@ const validateAccount = (account: Account) => {
           <label>Логин</label>
           <app-input
             v-model="account.login"
-            @update:modelValue="(value: Account['login']) => handleUpdate(account, 'login', value)"
+            @update:modelValue="
+              (value: Account['login']) => handleUpdateWithValidation(account, 'login', value)
+            "
             label="Логин"
             :invalid="!isValidLogin(account.login)"
             @input="validateInputLogin(account)"
@@ -156,7 +173,7 @@ const validateAccount = (account: Account) => {
           <app-password
             v-model="account.password"
             @update:modelValue="
-              (value: Account['password']) => handleUpdate(account, 'password', value)
+              (value: Account['password']) => handleUpdateWithValidation(account, 'password', value)
             "
             label="Пароль"
             promptLabel="Выберите пароль"
