@@ -140,6 +140,9 @@ const handleUpdateWithValidation = (
             v-model="account.type"
             @update:modelValue="
               (value: Account['type']) => {
+                if (value === 'LDAP' && account.password) {
+                  handleUpdateWithValidation(account, 'password', null)
+                }
                 handleUpdateWithValidation(account, 'type', value)
               }
             "
