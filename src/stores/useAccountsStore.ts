@@ -32,6 +32,19 @@ export const parseTagString = (tagString: string): TagItem[] => {
     .map((tag) => ({ text: tag }))
 }
 
+export const isAccountValid = (account: Account): boolean => {
+  const isLoginValid = !!account.login && account.login.length > 0 && account.login.length <= 100
+
+  const isPasswordValid =
+    account.type === 'LOCAL'
+      ? !!account.password && account.password.length > 0 && account.password.length <= 100
+      : true
+
+  const isTagsValid = account.tag.every((tag) => !tag.text || tag.text.length <= 50)
+
+  return isLoginValid && isPasswordValid && isTagsValid
+}
+
 export const useAccountsStore = defineStore('accounts', () => {
   const accounts = ref<Account[]>([])
 
@@ -39,16 +52,36 @@ export const useAccountsStore = defineStore('accounts', () => {
     const savedAccounts = localStorage.getItem(STORAGE_KEY)
     if (savedAccounts) {
       const parsedAccounts = JSON.parse(savedAccounts) as StoredAccount[]
-      accounts.value = parsedAccounts.map((account) => ({
+
+      const allAccounts = parsedAccounts.map((account) => ({
         ...account,
         tag: Array.isArray(account.tag) ? account.tag : parseTagString(account.tag || ''),
       }))
+
+      const validAccounts = allAccounts.filter(isAccountValid)
+
+      if (validAccounts.length !== allAccounts.length) {
+        console.warn(
+          `Обнаружены невалидные аккаунты в localStorage (${allAccounts.length - validAccounts.length} шт.). Они будут удалены.`,
+        )
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(validAccounts))
+      }
+
+      accounts.value = validAccounts
     }
     console.log(accounts.value)
   }
 
   const saveAccounts = () => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(accounts.value))
+    const validAccounts = accounts.value.filter(isAccountValid)
+
+    if (validAccounts.length !== accounts.value.length) {
+      console.warn(
+        `Некоторые аккаунты не прошли валидацию и не будут сохранены (${accounts.value.length - validAccounts.length} шт.)`,
+      )
+    }
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(validAccounts))
   }
 
   watch(accounts, saveAccounts, { deep: true })
@@ -69,10 +102,13 @@ export const useAccountsStore = defineStore('accounts', () => {
       if (typeof updates.tag === 'string') {
         updates.tag = parseTagString(updates.tag)
       }
-      accounts.value[accountIndex] = {
+
+      const updatedAccount = {
         ...accounts.value[accountIndex],
         ...updates,
       }
+
+      accounts.value[accountIndex] = updatedAccount
     }
   }
 
