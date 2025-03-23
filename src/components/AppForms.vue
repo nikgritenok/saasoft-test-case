@@ -99,10 +99,10 @@ const validateAccount = (account: Account) => {
 <template>
   <app-confirmdialog />
   <app-toast />
-  <div v-if="store.accounts.length > 0" class="forms-container">
+  <div v-if="store.accounts.length > 0" class="forms-container flex flex-column p-3">
     <TransitionGroup name="list" tag="div">
       <div
-        class="form-item flex flex-column md:flex-row"
+        class="form-item border-round-2xl align-items-start mb-3 gap-3 p-3 w-full flex flex-column md:flex-row"
         v-for="account in store.accounts"
         :key="account.id"
       >
@@ -136,7 +136,7 @@ const validateAccount = (account: Account) => {
           <label>Тип записи</label>
         </app-iftalabel>
 
-        <app-iftalabel class="flex flex-column gap-2 login-label w-full md:w-15rem">
+        <app-iftalabel class="flex flex-column gap-2 login-label flex-grow-1 w-full md:w-15rem">
           <label>Логин</label>
           <app-input
             v-model="account.login"
@@ -201,38 +201,8 @@ const validateAccount = (account: Account) => {
 </template>
 
 <style scoped>
-.forms-container {
-  display: flex;
-  flex-direction: column;
-  padding: 1rem;
-}
-
 .form-item {
-  width: 100%;
-  gap: 1rem;
-  align-items: flex-start;
-  margin-bottom: 1rem;
   background-color: var(--p-content-border-color);
-  padding: 1rem;
-  border-radius: 1rem;
-}
-
-.delete-icon {
-  cursor: pointer;
-}
-
-.delete-icon-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-i {
-  font-size: 3rem;
-}
-
-.login-label {
-  flex-grow: 1;
 }
 
 .list-enter-active,
@@ -248,9 +218,5 @@ i {
 
 .list-move {
   transition: transform 0.3s ease;
-}
-
-.p-password-input {
-  width: 100%;
 }
 </style>
