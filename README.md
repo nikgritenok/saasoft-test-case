@@ -37,3 +37,7 @@ src/
 ├── stores/         Pinia store with persistence
 └── types/
 ```
+
+## License
+
+MIT, see [LICENSE](LICENSE).
